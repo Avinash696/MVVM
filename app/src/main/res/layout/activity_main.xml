@@ -5,28 +5,35 @@
 
     <data>
 <variable
-    name="weather"
+    name="viewModel"
     type="String" />
     </data>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity"
-        android:transitionName="hi">
+        tools:context=".MainActivity">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true">
+
+
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:orientation="vertical"
+            android:padding="7dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@{weather}"
-                />
+                android:text="Weather description"
+                android:id="@+id/tv_weatherDesc" />
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@mipmap/ic_launcher"/>
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="#E1E880"
+                android:id="@+id/iv_icon"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -37,16 +44,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Feels like temperature"
+                android:id="@+id/tv_Feelslike"
                 />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Minimum temeratur"
+                android:id="@+id/tv_min"
                 />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Maximum Temperature"
+                android:id="@+id/tv_max"
                 />
             <TextView
                 android:layout_width="wrap_content"
@@ -61,7 +71,7 @@
                 android:id="@+id/btnGo"/>
         </LinearLayout>
 
-
+        </RelativeLayout>
 
     </RelativeLayout>
 </layout>
