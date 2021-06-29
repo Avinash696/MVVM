@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         viewModel = new ViewModelProvider(this).get(WeatherViewModel.class);
         viewModel.getWeatherListsObservable().observe(this, new Observer<WeatherModel>() {
             @Override
@@ -62,19 +61,19 @@ public class MainActivity extends AppCompatActivity {
                 if (weatherModels != null) {
                     weatherModelList = weatherModels;
 
-                    binding.tvWeatherDesc.setText(weatherModelList.getWeather().get(0).getDescription());
+                    binding.tvWeatherDesc.setText("Weather Description"+weatherModelList.getWeather().get(0).getDescription());
                     //img.
-                    binding.tvTempInCel.setText(df.format(weatherModelList.getMain().getTemp() - 273));
-                    binding.tvFeelslike.setText(df.format(weatherModelList.getMain().getFeelsLike() - 273));
-                    binding.tvMin.setText(df.format(weatherModelList.getMain().getTempMin() - 273));
-                    binding.tvMax.setText(df.format(weatherModelList.getMain().getTempMax() - 273));
+                    binding.tvTempInCel.setText("Temperature"+df.format(weatherModelList.getMain().getTemp() - 273));
+                    binding.tvFeelslike.setText("Feels Like temperature"+df.format(weatherModelList.getMain().getFeelsLike() - 273));
+                    binding.tvMin.setText("Temperature Minimum"+df.format(weatherModelList.getMain().getTempMin() - 273));
+                    binding.tvMax.setText("Temperature Maximum"+df.format(weatherModelList.getMain().getTempMax() - 273));
                     Glide.with(getApplicationContext()).load(
                             "http://openweathermap.org/img/wn/" + weatherModelList.getWeather().get(0).getIcon() + "@2x.png"
                     ).into(binding.ivIcon);
-                    cc();
+                    TimeConvert();
 
                 } else {
-                    binding.btnGo.setText("Error");
+                    Toast.makeText(MainActivity.this, "Restart app again", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void cc() {
+    private void TimeConvert() {
         long time1 = weatherModelList.getSys().getSunrise();
         long time2 = weatherModelList.getSys().getSunset();
         SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
@@ -92,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void gg() {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
         //permission check
         if (ActivityCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
