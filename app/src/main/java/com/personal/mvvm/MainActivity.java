@@ -1,15 +1,14 @@
 package com.personal.mvvm;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -23,22 +22,17 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.personal.mvvm.Model.WeatherModel;
-import com.personal.mvvm.Network.APIService;
-import com.personal.mvvm.Network.RetrofitInstance;
-import com.personal.mvvm.Repository.WeatherRepository;
 import com.personal.mvvm.ViewModel.WeatherViewModel;
-import com.personal.mvvm.ViewModel.WeatherViewModelFactory;
 import com.personal.mvvm.databinding.ActivityMainBinding;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
@@ -46,13 +40,15 @@ public class MainActivity extends AppCompatActivity {
     private WeatherModel weatherModelList;
     private WeatherViewModel viewModel;
     FusedLocationProviderClient fusedLocationProviderClient;
-    Double lat,lon;
+    Double lat, lon;
     DecimalFormat df;
+    ActionBar ab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        ab = getSupportActionBar();
 
         viewModel = new ViewModelProvider(this).get(WeatherViewModel.class);
         viewModel.getWeatherListsObservable().observe(this, new Observer<WeatherModel>() {
@@ -60,17 +56,21 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(WeatherModel weatherModels) {
                 if (weatherModels != null) {
                     weatherModelList = weatherModels;
-
-                    binding.tvWeatherDesc.setText("Weather Description"+weatherModelList.getWeather().get(0).getDescription());
+                    ab.setTitle(weatherModels.getName());
+                    binding.tvWeatherDesc.setText("Weather Description=" + weatherModelList.getWeather().get(0).getDescription());
                     //img.
-                    binding.tvTempInCel.setText("Temperature"+df.format(weatherModelList.getMain().getTemp() - 273));
-                    binding.tvFeelslike.setText("Feels Like temperature"+df.format(weatherModelList.getMain().getFeelsLike() - 273));
-                    binding.tvMin.setText("Temperature Minimum"+df.format(weatherModelList.getMain().getTempMin() - 273));
-                    binding.tvMax.setText("Temperature Maximum"+df.format(weatherModelList.getMain().getTempMax() - 273));
+                    binding.tvTempInCel.setText("Temperature=" + df.format(weatherModelList.getMain().getTemp() - 273));
+                    binding.tvFeelslike.setText("Feels Like temperature=" + df.format(weatherModelList.getMain().getFeelsLike() - 273));
+                    binding.tvMin.setText("Temperature Minimum=" + df.format(weatherModelList.getMain().getTempMin() - 273));
+                    binding.tvMax.setText("Temperature Maximum=" + df.format(weatherModelList.getMain().getTempMax() - 273));
                     Glide.with(getApplicationContext()).load(
                             "http://openweathermap.org/img/wn/" + weatherModelList.getWeather().get(0).getIcon() + "@2x.png"
                     ).into(binding.ivIcon);
-                    TimeConvert();
+//                    TimeConvert();
+//                    binding.tvTime.setText(TimeHMS(weatherModelList.getSys().getSunrise())+"/"+
+//                            TimeHMS(weatherModelList.getSys().getSunset()));
+                    binding.tvTime.setText(tt(weatherModelList.getSys().getSunrise())+"/"+
+                            tt(weatherModelList.getSys().getSunset()));
 
                 } else {
                     Toast.makeText(MainActivity.this, "Restart app again", Toast.LENGTH_SHORT).show();
@@ -80,13 +80,40 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    private void ttNew(){
+
+    }
+    private String tt(long milli){
+        String ttTime="";
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(milli);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(milli);
+        long hr = TimeUnit.MILLISECONDS.toHours(milli);
+        long day=TimeUnit.MILLISECONDS.toDays(milli);
+        ttTime=day+":"+hr+":"+minutes+":"+seconds;
+        return ttTime;
+    }
+    private String TimeHMS(long millis) {
+        long time1 = weatherModelList.getSys().getSunrise();
+        long time2 = weatherModelList.getSys().getSunset();
+        Date date=new Date(millis);
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("h:mm a");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return simpleDateFormat.format(date);
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            ZonedDateTime zonedDateTime= Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC);
+//        }
+    }
 
     private void TimeConvert() {
         long time1 = weatherModelList.getSys().getSunrise();
         long time2 = weatherModelList.getSys().getSunset();
-        SimpleDateFormat simpleTimeFormat = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
-        String mTime1 = simpleTimeFormat.format(time1);
-        String mTime2 = simpleTimeFormat.format(time2);
+
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
+        SimpleDateFormat simTimeFormat=new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+
+        String mTime1=simpleDateFormat.format(time1);
+        String mTime2=simTimeFormat.format(time2);
         binding.tvTime.setText(mTime1 + "/" + mTime2);
     }
 
@@ -110,10 +137,10 @@ public class MainActivity extends AppCompatActivity {
                             List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
                                     location.getLongitude(), 1);
                             //here u have lat long now
-                            lat=addresses.get(0).getLatitude();
-                            lon=addresses.get(0).getLongitude();
-                           // locationChanged(lat,lon);
-                            viewModel.TakeRetrofitData(lat,lon);
+                            lat = addresses.get(0).getLatitude();
+                            lon = addresses.get(0).getLongitude();
+                            // locationChanged(lat,lon);
+                            viewModel.TakeRetrofitData(lat, lon);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -131,6 +158,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         gg();
         super.onStart();
-         df=new DecimalFormat("#.##");
+        df = new DecimalFormat("#.##");
     }
 }
