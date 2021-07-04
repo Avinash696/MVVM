@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     Double lat, lon;
     DecimalFormat df;
     ActionBar ab;
+    String area;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             public void onChanged(WeatherModel weatherModels) {
                 if (weatherModels != null) {
                     weatherModelList = weatherModels;
-                    ab.setTitle(weatherModels.getName());
+                    ab.setTitle(weatherModels.getName() + "/" + area);
                     binding.tvWeatherDesc.setText("Weather Description=" + weatherModelList.getWeather().get(0).getDescription());
                     //img.
                     binding.tvTempInCel.setText("Temperature=" + df.format(weatherModelList.getMain().getTemp() - 273));
@@ -66,56 +69,21 @@ public class MainActivity extends AppCompatActivity {
                     Glide.with(getApplicationContext()).load(
                             "http://openweathermap.org/img/wn/" + weatherModelList.getWeather().get(0).getIcon() + "@2x.png"
                     ).into(binding.ivIcon);
-//                    TimeConvert();
-//                    binding.tvTime.setText(TimeHMS(weatherModelList.getSys().getSunrise())+"/"+
-//                            TimeHMS(weatherModelList.getSys().getSunset()));
-                    binding.tvTime.setText(tt(weatherModelList.getSys().getSunrise())+"/"+
-                            tt(weatherModelList.getSys().getSunset()));
-
+                    binding.tvTime.setText( toDate(weatherModelList.getSys().getSunrise()+41600)+":"
+                            +toDate((weatherModelList.getSys().getSunset()-44800)));
                 } else {
                     Toast.makeText(MainActivity.this, "Restart app again", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-
     }
-    private void ttNew(){
-
+    public static String toDate(int time) {
+        SimpleDateFormat HMM = new SimpleDateFormat("hh:mm a");
+        HMM.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
+        final Date date = new Date(time*1000);
+        return HMM.format(date);
     }
-    private String tt(long milli){
-        String ttTime="";
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(milli);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(milli);
-        long hr = TimeUnit.MILLISECONDS.toHours(milli);
-        long day=TimeUnit.MILLISECONDS.toDays(milli);
-        ttTime=day+":"+hr+":"+minutes+":"+seconds;
-        return ttTime;
-    }
-    private String TimeHMS(long millis) {
-        long time1 = weatherModelList.getSys().getSunrise();
-        long time2 = weatherModelList.getSys().getSunset();
-        Date date=new Date(millis);
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("h:mm a");
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return simpleDateFormat.format(date);
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//            ZonedDateTime zonedDateTime= Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC);
-//        }
-    }
-
-    private void TimeConvert() {
-        long time1 = weatherModelList.getSys().getSunrise();
-        long time2 = weatherModelList.getSys().getSunset();
-
-
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm:ss a", Locale.getDefault());
-        SimpleDateFormat simTimeFormat=new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-
-        String mTime1=simpleDateFormat.format(time1);
-        String mTime2=simTimeFormat.format(time2);
-        binding.tvTime.setText(mTime1 + "/" + mTime2);
-    }
+   
 
     private void gg() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -139,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                             //here u have lat long now
                             lat = addresses.get(0).getLatitude();
                             lon = addresses.get(0).getLongitude();
+                            area = addresses.get(0).getAdminArea();
                             // locationChanged(lat,lon);
                             viewModel.TakeRetrofitData(lat, lon);
                         } catch (IOException e) {

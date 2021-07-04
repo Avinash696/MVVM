@@ -6,8 +6,10 @@ import com.personal.mvvm.Model.WeatherModel;
 import com.personal.mvvm.Network.APIService;
 import com.personal.mvvm.Network.RetrofitInstance;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -15,9 +17,11 @@ import retrofit2.Response;
 
 public class WeatherRepository {
 
+
     // observer-when get hit will tell activity who is observing
 
     private MutableLiveData<WeatherModel> weatherList;
+    private MutableLiveData<String> ttime;
 
     public WeatherRepository(){
         weatherList=new MutableLiveData<>();
@@ -26,6 +30,9 @@ public class WeatherRepository {
     //return live data
     public MutableLiveData<WeatherModel> getWeatherListObserver(){
         return weatherList;
+    }
+    private MutableLiveData<String> getTtimeObserver(){
+        return ttime;
     }
     public void makeApiCall(Double mlat,Double mlon){
         APIService apiService= RetrofitInstance.getClient().create(APIService.class);
@@ -44,5 +51,6 @@ public class WeatherRepository {
            }
        });
     }
+
 
 }

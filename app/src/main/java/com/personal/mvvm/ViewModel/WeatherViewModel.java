@@ -6,13 +6,10 @@ import androidx.lifecycle.ViewModel;
 import com.personal.mvvm.Model.WeatherModel;
 import com.personal.mvvm.Repository.WeatherRepository;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-
 public class WeatherViewModel extends ViewModel {
 
-    private WeatherRepository weatherRepository,timeRepositary;
-    private Double d1,d2;
+    private WeatherRepository weatherRepository;
+
 
 
     public WeatherViewModel() {
@@ -29,5 +26,14 @@ public class WeatherViewModel extends ViewModel {
 
     public void TakeRetrofitData(Double d1,Double d2) {
         weatherRepository.makeApiCall(d1,d2);
+    }
+    private void TimeHMSViewModel() {
+       long time1 = weatherRepository.getWeatherListObserver().getValue().getSys().getSunrise();
+       long time2 = weatherRepository.getWeatherListObserver().getValue().getSys().getSunrise();
+//       long time2 = weatherModelList.getSys().getSunset();
+//        Date date=new Date(millis);
+//        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("h:mm a");
+//        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+//       simpleDateFormat.format(date);
     }
 }
