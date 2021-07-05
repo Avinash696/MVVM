@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getCureentlocation();
+        df = new DecimalFormat("#.##");
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         ab = getSupportActionBar();
 
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
    
 
-    private void gg() {
+    private void getCureentlocation() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         //permission check
@@ -125,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        gg();
+
         super.onStart();
-        df = new DecimalFormat("#.##");
+
     }
 }
